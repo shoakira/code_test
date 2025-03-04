@@ -1,24 +1,33 @@
-# プロジェクト概要
+# 🚀 Project Overview
 
-このプロジェクトは、さまざまな分野に関連するPythonスクリプトとデータを含むディレクトリ構造を持っています。以下に各ディレクトリの概要を示します。
+This project contains a directory structure with Python scripts and data related to various fields. Below is an overview of each directory.
 
-## dynamical_system
+## 📂 Directory Structure
 
-動的システムに関連するスクリプトとデータファイルが含まれています。特に、ハミルトン系や軌道解析に関するスクリプトがあります。
+### 🔄 dynamical_system
+Contains scripts and data files related to dynamical systems. Includes scripts for Hamiltonian systems and orbit analysis.
 
-## make_game
+### 🎮 make_game
+Contains scripts and resources related to game development. You can create various games using scripts such as `galaga.py` and `invader.py`.
 
-ゲーム開発に関連するスクリプトとリソースが含まれています。`galaga.py`や`invader.py`などのスクリプトを使用して、さまざまなゲームを作成できます。
+### 🤖 openai_test
+Contains scripts for testing OpenAI functionality. Includes demos for JSON formatting and translation features.
 
-## openai_test
+### 🧠 RL_code
+Contains code related to reinforcement learning. You can implement reinforcement learning algorithms using `RLgym.py` and `RLPolicyGradient.py`.
 
-OpenAIの機能をテストするためのスクリプトが含まれています。JSONフォーマットや翻訳機能のデモがあります。
+### 📊 robot_graph
+Contains scripts and data related to robot graphs. Includes scripts for graph visualization and data transformation.
 
-## RL_code
+## 🛠️ Usage
 
-強化学習に関連するコードが含まれています。`RLgym.py`や`RLPolicyGradient.py`を使用して、強化学習のアルゴリズムを実装できます。
+Each directory contains specific tools and scripts that can be used according to their respective documentation.
 
-## robot_graph
+## 📝 Contributing
 
-ロボットグラフに関連するスクリプトとデータが含まれています。グラフの可視化やデータ変換に関するスクリプトがあります。
+Feel free to submit issues or pull requests if you have suggestions or improvements.
+
+## 📜 License
+
+This project is available for internal use and testing purposes.
 
