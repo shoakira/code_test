@@ -4,9 +4,6 @@ This project contains a directory structure with Python scripts and data related
 
 ## 📂 Directory Structure
 
-### 🌀 dynamical_system
-Contains scripts and data files related to dynamical systems. Includes scripts for Hamiltonian systems and orbit analysis.
-
 ### 🎮 make_game
 Contains scripts and resources related to game development. You can create various games using scripts such as `galaga.py` and `invader.py`.
 
