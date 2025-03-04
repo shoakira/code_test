@@ -1,0 +1,29 @@
+// ノードの作成
+MERGE (hand_empty_robot1:State {name:'hand_empty_robot1'});
+MERGE (at_ball_table:AtState {name:'at_ball_table'});
+MERGE (at_ball_target:AtState {name:'at_ball_target'});
+MERGE (ball:Object {name:'ball'});
+MERGE (pick_up:Action {name:'pick_up'});
+MERGE (robot1:Robot {name:'robot1'});
+MERGE (place:Action {name:'place'});
+MERGE (holding_robot1_ball:State {name:'holding_robot1_ball'});
+MERGE (table:Location {name:'table'});
+MERGE (target:Location {name:'target'});
+
+// リレーションシップの作成
+MERGE (holding_robot1_ball) MERGE (ball) MERGE (holding_robot1_ball)-[:object]->(ball);
+MERGE (pick_up) MERGE (robot1) MERGE (pick_up)-[:actor]->(robot1);
+MERGE (place) MERGE (at_ball_target) MERGE (place)-[:hasEffect]->(at_ball_target);
+MERGE (at_ball_table) MERGE (ball) MERGE (at_ball_table)-[:object]->(ball);
+MERGE (at_ball_target) MERGE (ball) MERGE (at_ball_target)-[:object]->(ball);
+MERGE (at_ball_table) MERGE (table) MERGE (at_ball_table)-[:location]->(table);
+MERGE (pick_up) MERGE (ball) MERGE (pick_up)-[:target]->(ball);
+MERGE (place) MERGE (ball) MERGE (place)-[:target]->(ball);
+MERGE (pick_up) MERGE (holding_robot1_ball) MERGE (pick_up)-[:hasEffect]->(holding_robot1_ball);
+MERGE (place) MERGE (robot1) MERGE (place)-[:actor]->(robot1);
+MERGE (holding_robot1_ball) MERGE (robot1) MERGE (holding_robot1_ball)-[:actor]->(robot1);
+MERGE (place) MERGE (holding_robot1_ball) MERGE (place)-[:hasPrecondition]->(holding_robot1_ball);
+MERGE (pick_up) MERGE (hand_empty_robot1) MERGE (pick_up)-[:hasPrecondition]->(hand_empty_robot1);
+MERGE (at_ball_target) MERGE (target) MERGE (at_ball_target)-[:location]->(target);
+MERGE (pick_up) MERGE (at_ball_table) MERGE (pick_up)-[:hasPrecondition]->(at_ball_table);
+MERGE (hand_empty_robot1) MERGE (robot1) MERGE (hand_empty_robot1)-[:actor]->(robot1);

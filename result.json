@@ -1,0 +1,21 @@
+{
+  "steps": [
+    {
+      "explanation": "First, let's isolate the term with x by subtracting 7 from both sides of the equation.",
+      "output": "8x + 7 - 7 = -23 - 7"
+    },
+    {
+      "explanation": "After performing the subtraction, we simplify both sides of the equation.",
+      "output": "8x = -30"
+    },
+    {
+      "explanation": "Now, solve for x by dividing both sides by 8 to get x by itself.",
+      "output": "8x/8 = -30/8"
+    },
+    {
+      "explanation": "Perform the division to simplify the right side of the equation.",
+      "output": "x = -15/4"
+    }
+  ],
+  "final_answer": "x = -15/4"
+}
