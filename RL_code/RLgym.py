@@ -5,6 +5,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import numpy as np
 from collections import namedtuple, deque
 
 # ハイパーパラメータ
@@ -15,7 +16,7 @@ EPS_END = 0.01
 EPS_DECAY = 500
 TARGET_UPDATE = 10
 LR = 1e-3
-NUM_EPISODES = 500
+NUM_EPISODES = 100
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -112,7 +113,7 @@ def optimize_model(policy_net, target_net, memory, optimizer):
 
 
 def main():
-    env = gym.make("CartPole-v1")
+    env = gym.make("CartPole-v1", render_mode="human")
     state = env.reset()
     if isinstance(state, tuple):  # gym >=0.26 の場合
         state, _ = state
@@ -129,14 +130,17 @@ def main():
     memory = ReplayMemory(10000)
 
     steps_done = 0
+    last_rewards = deque(maxlen=10)  # 直近10エピソードの報酬を保存するためのデック
     for i_episode in range(NUM_EPISODES):
         state = env.reset()
         if isinstance(state, tuple):
             state, _ = state
-        state = torch.tensor([state], device=device, dtype=torch.float)
+        state = torch.tensor(np.array([state]), device=device, dtype=torch.float)
         total_reward = 0
         for t in range(1, 10000):
-            env.render()  # 可視化: 各ステップで描画
+            if t % 10 == 0:  # 10ステップごとに可視化
+                env.render()  # 可視化: 10ステップごとに描画
+                time.sleep(0.02)  # 表示時のみ遅延を入れる
             action = select_action(state, policy_net, steps_done, n_actions)
             steps_done += 1
             result = env.step(action.item())
@@ -172,35 +176,46 @@ def main():
             optimize_model(policy_net, target_net, memory, optimizer)
 
             if done:
-                print(
-                    f"Episode {i_episode} finished after {t} timesteps, "
-                    f"total reward: {total_reward}"
-                )
+                # 10エピソードごとに結果を表示
+                if i_episode % 10 == 0:
+                    print(
+                        f"Episode {i_episode} finished after {t} timesteps, "
+                        f"total reward: {total_reward}"
+                    )
+                last_rewards.append(total_reward)  # 報酬を保存
                 break
-            time.sleep(0.02)
 
         if i_episode % TARGET_UPDATE == 0:
             target_net.load_state_dict(policy_net.state_dict())
     print("Training complete")
+    print(f"最終{min(10, NUM_EPISODES)}エピソードの平均スコア: {sum(last_rewards)/len(last_rewards):.1f}")
     env.close()
 
     # 学習済みモデルを用いて可視化（テスト）する部分
-    test_env = gym.make("CartPole-v1", render_mode="rgb_array")
+    test_env = gym.make("CartPole-v1", render_mode="human")  # render_modeをrgb_arrayからhumanに変更
+    
+    # moviepyがない場合はRecordVideoラッパーを使わない
+    use_video_recording = False
     try:
-        # RecordVideo を使って動画を保存（video フォルダに保存されます）
+        import moviepy
+        use_video_recording = True
+        test_env = gym.make("CartPole-v1", render_mode="rgb_array")
         test_env = gym.wrappers.RecordVideo(
             test_env, video_folder="./video", name_prefix="dqn-cartpole-demo"
         )
-    except gym.error.DependencyNotInstalled:
-        print("MoviePyがインストールされていないため、動画記録をスキップします。")
+        print("動画を記録します: ./video")
+    except ImportError:
+        print("MoviePyがインストールされていないため、動画記録なしで実行します。")
+        print("動画記録を有効にするには: pip install moviepy")
 
     state = test_env.reset()
     if isinstance(state, tuple):
         state, _ = state
-    state = torch.tensor([state], device=device, dtype=torch.float)
+    state = torch.tensor(np.array([state]), device=device, dtype=torch.float)
     done = False
+    steps_count = 0
     while not done:
-        # test_env.render() は RecordVideo ラッパーでは不要（または呼び出すとエラーになるため削除）
+        steps_count += 1
         with torch.no_grad():
             action = policy_net(state).max(1)[1].view(1, 1)
         result = test_env.step(action.item())
@@ -215,7 +230,9 @@ def main():
                 device=device,
                 dtype=torch.float
             )
-        time.sleep(0.02)
+        # 10ステップごとに遅延を入れる
+        if steps_count % 10 == 0:
+            time.sleep(0.02)
     test_env.close()
 
 
