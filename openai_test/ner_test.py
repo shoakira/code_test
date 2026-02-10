@@ -1,7 +1,7 @@
 # Named entity recognition
 import spacy
 
-# Load the GiNZA model
+# Load the Japanese spaCy model
 nlp = spacy.load("ja_core_news_sm")
 
 
