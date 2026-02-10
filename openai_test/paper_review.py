@@ -16,23 +16,23 @@ def extract_text_from_pdf(pdf_path):
 
 # OpenAI APIを使用してテキストのサマリーを生成する関数
 def summarize_text(text, api_key):
-    openai.api_key = api_key
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
         model="gpt-4o",  # 正しいモデル名を使用
         messages=[
             {"role": "system", "content": "以下の論文のテキストの要約を読みやすく構造化し、日本語で書いてください。"},
             {"role": "user", "content": text}
         ],
-        max_tokens=5500,
+        max_tokens=2000,
         temperature=0.5,
     )
-    summary = response.choices[0].message['content'].strip()
+    summary = response.choices[0].message.content.strip()
     return summary
 
 
 # メイン関数
 def main():
-    pdf_path = '2412.06769v2.pdf'  # PDFファイルのパスを指定
+    pdf_path = '../hoge.pdf'  # PDFファイルのパスを指定
     api_key = os.getenv('OPENAI_API_KEY')  # 環境変数からAPIキーを取得
 
     if not api_key:

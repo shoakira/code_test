@@ -5,17 +5,18 @@ load_dotenv()
 
 
 # 環境変数からAPIキーを読み込む
-openai.api_key = os.environ.get("OPENAI_API_KEY")
 # APIキーが設定されていない場合は警告
-if not openai.api_key:
+if not os.environ.get("OPENAI_API_KEY"):
     raise ValueError("環境変数 OPENAI_API_KEY が設定されていません")
+
+client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 def translate_japanese_to_french(text):
     """日本語をフランス語に翻訳する"""
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "あなたは優秀な翻訳アシスタントです。"},
                 {"role": "user", "content": f"次の日本語をフランス語に翻訳してください: {text}"}
