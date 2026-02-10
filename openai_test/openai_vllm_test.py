@@ -43,12 +43,20 @@ text = explanation.message.content
 wrapped_explanation = "\n".join(textwrap.wrap(text, width=35))  # 40文字ごとに改行
 
 
-response_image = requests.get(image_url)  # 画像をURLから取得
-img = Image.open(BytesIO(response_image.content))  # バイトデータをPillow形式に変換
 
-# 画像を表示し、キャプションとしてLLMの解説を表示
-plt.figure(figsize=(8, 8))  # matplotlibで表示サイズを指定
-plt.imshow(img)  # 画像をプロット
-plt.axis("off")  # 軸を非表示
-plt.title(wrapped_explanation, fontsize=12, loc='center')  # 改行済みキャプションを使用
-plt.show()  # プロットを表示
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+}
+response_image = requests.get(image_url, headers=headers)  # 画像をURLから取得
+if response_image.status_code != 200:
+    print(f"Failed to download image. Status code: {response_image.status_code}")
+else:
+
+    img = Image.open(BytesIO(response_image.content))  # バイトデータをPillow形式に変換
+
+    # 画像を表示し、キャプションとしてLLMの解説を表示
+    plt.figure(figsize=(8, 8))  # matplotlibで表示サイズを指定
+    plt.imshow(img)  # 画像をプロット
+    plt.axis("off")  # 軸を非表示
+    plt.title(wrapped_explanation, fontsize=12, loc='center')  # 改行済みキャプションを使用
+    plt.show()  # プロットを表示
