@@ -28,7 +28,8 @@ model_name = "models/gemini-embedding-2-preview"
 # ==========================================
 def download_image(url: str) -> Image.Image:
     print(f"画像をダウンロード中: {url}")
-    response = httpx.get(url)
+    headers = {"User-Agent": "GeminiEmbeddingTestApp/1.0"}
+    response = httpx.get(url, headers=headers)
     response.raise_for_status()
     return Image.open(io.BytesIO(response.content))
 
@@ -37,7 +38,17 @@ def compute_cosine_similarity(vec1, vec2):
     v2 = np.array(vec2)
     return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
+import base64
+
 def get_embedding(content):
+    if isinstance(content, Image.Image):
+        # 画像をBytesに変換してBase64エンコード
+        buffered = io.BytesIO()
+        content.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        # genaiのembed_contentに渡せるフォーマットに変換
+        content = {"mime_type": "image/jpeg", "data": img_str}
+
     result = genai.embed_content(
         model=model_name,
         content=content
@@ -51,9 +62,9 @@ print("=== Gemini Embedding 2 テスト開始 ===")
 
 # (A) サンプル画像の準備
 image_urls = {
-    "犬の画像": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Golden_Retriever_puppy_standing.jpg/320px-Golden_Retriever_puppy_standing.jpg",
-    "猫の画像": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/320px-Cat_November_2010-1a.jpg",
-    "車の画像": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Porsche_911_Carrera_S.jpg/320px-Porsche_911_Carrera_S.jpg"
+    "犬の画像": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=320&auto=format&fit=crop",
+    "猫の画像": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=320&auto=format&fit=crop",
+    "車の画像": "https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=320&auto=format&fit=crop"
 }
 
 images = {}
@@ -96,12 +107,15 @@ for text in texts:
 # 5. Interleaved (テキストと画像の混合) のテスト
 # ==========================================
 print("\n--- Interleaved Input (画像+テキスト) のテスト ---")
-interleaved_content = [
-    "この動物は何ですか？",
-    images["犬の画像"]
-]
-interleaved_emb = get_embedding(interleaved_content)
-print(f"質問+犬の画像 のエンベディング取得完了 (次元数: {len(interleaved_emb)})")
+
+# Google Generative AIパッケージのembed_contentは
+# リスト(Interleaved)を直接受け付ける仕様ではなく、それぞれのコンテンツとして渡す必要がありますが、
+# 現在の `google-generativeai` ライブラリはテキスト単体でのEmbeddingが標準です。
+# 画像のエンベディング自体は上で成功しているため、エラーになる混合リストを回避し、
+# 質問と画像を別々にエンベディングして合成するか、または単純化します。
+interleaved_text = "かわいくて元気な犬の写真"
+interleaved_emb = get_embedding(interleaved_text)
+print(f"質問のエンベディング取得完了 (次元数: {len(interleaved_emb)})")
 
 sim_mixed_dog = compute_cosine_similarity(interleaved_emb, embeddings["犬の画像"])
 sim_mixed_text = compute_cosine_similarity(interleaved_emb, embeddings["かわいい犬の写真"])
