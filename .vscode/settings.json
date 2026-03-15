@@ -1,4 +1,4 @@
 {
-    "python.defaultInterpreterPath": "/Users/robocip/Documents/work/code_test/.venv/bin/python",
+    "python.defaultInterpreterPath": "/Users/robocip/.pyenv/versions/3.12.6/bin/python",
     "python.terminal.activateEnvironment": true
 }
