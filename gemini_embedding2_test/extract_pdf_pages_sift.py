@@ -71,16 +71,16 @@ def extract_pages_with_sift(pdf_path, logo_path, output_path, min_match_count=10
         # 特徴量マッチング（FLANN）
         matches = flann.knnMatch(des_logo, des_page, k=2)
 
-        # Lowe's ratio test (誤認識を強力に弾くためのテスト)
+        # Lowe's ratio test (シンプルな図形向けに0.75に緩める)
         good_matches = []
         for match in matches:
             if len(match) == 2:
                 m, n = match
-                if m.distance < 0.7 * n.distance:
+                if m.distance < 0.75 * n.distance:
                     good_matches.append(m)
         
         # 良いマッチが閾値以上見つかった場合、さらに幾何学的チェック(Homography)を行う
-        if len(good_matches) > min_match_count:
+        if len(good_matches) >= min_match_count:
             # 良いマッチング点から座標を取得
             src_pts = np.float32([kp_logo[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
             dst_pts = np.float32([kp_page[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
@@ -94,13 +94,14 @@ def extract_pages_with_sift(pdf_path, logo_path, output_path, min_match_count=10
                 inlier_count = sum(matchesMask)
                 
                 # インライア（外れ値を除外した正しい対応点）の数で最終判定
+                # 数学的に4点以上あれば図形の変形が証明できます
                 if inlier_count >= min_match_count:
                     print(f"✅ ページ {page_num + 1} にロゴを発見 (良いマッチ数: {len(good_matches)}, 形状一致点: {inlier_count})")
                     found_pages.append(page_num)
                     extracted_doc.insert_pdf(doc, from_page=page_num, to_page=page_num)
                     continue
                 else:
-                    print(f"❌ ページ {page_num + 1} はスキップ (形状チェック不合格: {inlier_count})")
+                    print(f"❌ ページ {page_num + 1} はスキップ (形状チェック不合格: {inlier_count} / {len(good_matches)})")
             else:
                 print(f"❌ ページ {page_num + 1} はスキップ (図形の変形が計算不可)")
         else:
@@ -122,8 +123,8 @@ if __name__ == "__main__":
     OUTPUT_FILE = "extracted_pages.pdf"     # 保存PDFファイル名
     
     # 画像内の特徴点が何個以上(相似な配置で)一致したら「ロゴあり」とするかの閾値
-    # アイコンのようにシンプルなものは少なめ(10)、複雑な写真は多め(30など)にします
-    MIN_MATCH_COUNT = 10 
+    # OpenAIのロゴようなシンプルな図形は抽出される特徴点が少ないため下げます
+    MIN_MATCH_COUNT = 4 
     
     try:
         extract_pages_with_sift(PDF_FILE, LOGO_FILE, OUTPUT_FILE, MIN_MATCH_COUNT)
