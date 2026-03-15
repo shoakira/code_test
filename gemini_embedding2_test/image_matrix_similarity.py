@@ -43,9 +43,10 @@ def get_embedding(image_path):
 def main():
     # 比較する画像のリストをユーザー指定のものに固定
     image_files = [
-        "image_sample.png",
-        "image_sample2.png",
-        "image_sample3.png"
+        "image1.png",
+        "image2.png",
+        "image3.png",
+        "image4.png",
     ]
     
     # 実際に存在するファイルのみに絞り込む
