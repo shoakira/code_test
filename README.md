@@ -21,10 +21,19 @@ Contains scripts for extracting text from PDF files. Includes `extract_pdf_text.
 
 ### 🔍 gemini_embedding2_test
 Contains scripts for exploring multimodal embeddings and comparing various image/PDF search techniques.
-- `embedding_test.py`: Script to test **Gemini Embedding 2**'s multimodal capabilities, mapping both images and text into the same vector space to compute cosine similarities. Also demonstrates secure API key management using `.env`.
-- `extract_with_embedding.py`: Uses **Gemini Embedding 2** to search and extract specific PDF pages based on abstract "meaning" or "vibe" queries. Not suitable for exact pixel-perfect matches (e.g., small logos).
-- `extract_pdf_pages.py`: Uses **OpenCV Template Matching** for finding exact pixel matches of an image inside PDFs. Highly sensitive to scale and rotation.
-- `extract_pdf_pages_sift.py`: Uses **OpenCV SIFT Feature Matching**. The most robust, accurate, and fast method for finding specific geometric shapes or logos inside a PDF document, as it is invariant to scale and rotation.
+- `embedding_test.py`: Script to test **Gemini Embedding 2**'s multimodal capabilities.
+- `extract_with_embedding.py`: Uses **Gemini Embedding 2** for abstract PDF page extraction.
+- `extract_pdf_pages.py`: Uses **OpenCV Template Matching** for pixel-perfect search.
+- `extract_pdf_pages_sift.py`: Uses **OpenCV SIFT Feature Matching** for robust geometric logo search.
+- `scene_similarity_test.py`: Compares an image with multiple detailed text queries (e.g., dog park scenes) to find the most accurate semantic description.
+- `image_matrix_similarity.py`: Calculates and visualizes a similarity matrix (heatmap) between multiple images.
+- `mixed_matrix_similarity.py`: Performs cross-modal comparison between images and texts, visualizing their relationships in a single heatmap matrix.
+
+#### 💡 Key Insights from Experiments
+- **Semantic Nuance**: Gemini Embedding 2 can distinguish fine-grained differences in scenes (e.g., a dog "running" vs "resting", or "red" vs "green" frisbees) by mapping them to distinct vectors.
+- **Modality Agnostic**: Images and texts can be directly compared, allowing for precise cross-modal retrieval and similarity analysis.
+- **Tool Selection**: While embeddings are great for "vibe" and "meaning," traditional CV (SIFT) remains superior for exact, small geometric pattern matching (logos).
+
 
 ## 📝 Root Scripts
 
