@@ -39,10 +39,10 @@ def get_embedding(content):
     )
     return result['embedding']
 
-def extract_pages_with_gemini(pdf_path, output_path, target_image_path=None, target_text=None, threshold=0.4):
+def extract_pages_with_gemini(pdf_path, output_path, target_image_path=None, target_text=None, top_k=1):
     """
     Gemini Embedding 2 を使用して、PDF内の各ページとターゲット（画像またはテキスト）
-    の類似度を計算し、類似度が高いページを抽出します。
+    の類似度を計算し、類似度が最も高い上位ページを抽出します。
     """
     if not target_image_path and not target_text:
         print("検索対象の画像パスまたはテキストの少なくとも一方を指定してください。")
@@ -52,7 +52,11 @@ def extract_pages_with_gemini(pdf_path, output_path, target_image_path=None, tar
     query_embeddings = {}
     
     # 1. 画像クエリのベクトル化
-    if target_image_path and os.path.exists(target_image_path):
+    if target_image_path:
+        if not os.path.exists(target_image_path):
+            print(f"❌ エラー: ターゲット画像 '{target_image_path}' が見つかりません。")
+            print("画像をプログラムと同じフォルダに保存してください！")
+            return
         print(f"ターゲット画像 '{target_image_path}' を読み込んでいます...")
         target_img = Image.open(target_image_path).convert("RGB")
         query_embeddings['image'] = get_embedding(target_img)
@@ -71,11 +75,10 @@ def extract_pages_with_gemini(pdf_path, output_path, target_image_path=None, tar
         print(f"PDFが開けません: {e}")
         return
 
-    extracted_doc = fitz.open()
-    found_pages = []
+    page_scores = []
 
     for page_num in range(len(doc)):
-        print(f"\n📄 ページ {page_num + 1} / {len(doc)} を解析中...")
+        print(f"\r📄 ページ {page_num + 1} / {len(doc)} を解析中...", end="")
         page = doc[page_num]
         
         # ページを画像（PIL.Image）として取得
@@ -86,34 +89,39 @@ def extract_pages_with_gemini(pdf_path, output_path, target_image_path=None, tar
         # ページのエンベディングを取得
         page_embedding = get_embedding(page_img)
         
-        # クエリとの類似度を計算
-        is_target_page = False
+        # クエリとの類似度を計算し、最も高いスコアを記録
+        best_score = -1.0
         
         if 'image' in query_embeddings:
             sim_img = compute_cosine_similarity(page_embedding, query_embeddings['image'])
-            print(f"  [画像比較] ロゴ画像との類似度: {sim_img:.4f}")
-            if sim_img >= threshold:
-                is_target_page = True
-                print("    -> 画像類似度により抽出条件をクリア！")
+            best_score = max(best_score, sim_img)
                 
         if 'text' in query_embeddings:
             sim_text = compute_cosine_similarity(page_embedding, query_embeddings['text'])
-            print(f"  [テキスト比較] 検索テキストとの類似度: {sim_text:.4f}")
-            if sim_text >= threshold:
-                is_target_page = True
-                print("    -> テキスト類似度により抽出条件をクリア！")
+            best_score = max(best_score, sim_text)
 
-        # 抽出対象であれば記録する
-        if is_target_page:
-            found_pages.append(page_num)
-            extracted_doc.insert_pdf(doc, from_page=page_num, to_page=page_num)
+        page_scores.append((page_num, best_score))
+
+    print("\n\n--- 類似度ランキング ---")
+    # スコアが高い順に並び替え
+    page_scores.sort(key=lambda x: x[1], reverse=True)
+    
+    extracted_doc = fitz.open()
+    found_pages = []
+    
+    # 上位K件を抽出
+    for rank in range(min(top_k, len(page_scores))):
+        page_num, score = page_scores[rank]
+        print(f"{rank + 1}位: ページ {page_num + 1} (スコア: {score:.4f})")
+        found_pages.append(page_num)
+        
+        # PyMuPDFでは抽出元のページ番号をそのまま指定して挿入します
+        extracted_doc.insert_pdf(doc, from_page=page_num, to_page=page_num)
 
     # 抽出結果の保存
     if found_pages:
         extracted_doc.save(output_path)
-        print(f"\n🎉 抽出完了！ 対象の {len(found_pages)} ページを '{output_path}' に保存しました。")
-    else:
-        print("\n⚠️ 類似度がしきい値を超えるページは見つかりませんでした。")
+        print(f"\n🎉 抽出完了！ 上位 {len(found_pages)} ページを '{output_path}' に保存しました。")
         
     doc.close()
     extracted_doc.close()
@@ -121,18 +129,17 @@ def extract_pages_with_gemini(pdf_path, output_path, target_image_path=None, tar
 if __name__ == "__main__":
     PDF_FILE = "sample.pdf"                 # 検索対象のPDF
     OUTPUT_FILE = "extracted_pages.pdf"     # 抽出結果のPDF
-    LOGO_IMAGE = "logo.png"                 # 探したいロゴ画像 (ない場合は None を指定)
-    SEARCH_TEXT = "会社のロゴが入っているページ"  # 探したいテキスト (ない場合は None を指定)
+    # 検索したいロゴ画像があればファイル名を指定。ない場合は None
+    LOGO_IMAGE = "logo.png"                 
+    SEARCH_TEXT = None # 画像のみで検索するため、テキストはNoneにする
     
-    # 類似度のしきい値
-    # Gemini Embeddingは一般的に値が高めに出るため、
-    # 実際のログを見ながら 0.35 〜 0.45 あたりで調整してください。
-    THRESHOLD = 0.40  
+    # 上位何ページを抽出するか
+    TOP_K = 1
 
     extract_pages_with_gemini(
         pdf_path=PDF_FILE,
         output_path=OUTPUT_FILE,
         target_image_path=LOGO_IMAGE, 
         target_text=SEARCH_TEXT,
-        threshold=THRESHOLD
+        top_k=TOP_K
     )

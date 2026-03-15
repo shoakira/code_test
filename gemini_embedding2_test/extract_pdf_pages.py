@@ -52,14 +52,21 @@ def extract_pages_with_logo(pdf_path, logo_path, output_path, match_threshold=0.
         page_gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
 
         found_in_page = False
+        best_overall_score = -1.0
+        best_overall_scale = 1.0
         
         # マルチスケールマッチング
-        # ロゴがPDF上でどんな大きさで表示されていても対応できるように、
-        # ロゴ画像を20%〜200%の様々な大きさに変えながら照合します。
-        scales = np.linspace(0.2, 2.0, 20)[::-1]
+        # サイズの違いに非常に敏感なため、より細かく60段階で探すように変更します。
+        scales = np.linspace(0.1, 2.5, 60)[::-1]
         
         for scale in scales:
-            resized_logo = cv2.resize(logo_gray, (0, 0), fx=scale, fy=scale)
+            # OpenCVはピクセルサイズが整数である必要があるため、1未満の縮小でエラーにならないよう制御
+            new_width = int(logo_gray.shape[1] * scale)
+            new_height = int(logo_gray.shape[0] * scale)
+            if new_width == 0 or new_height == 0:
+                continue
+
+            resized_logo = cv2.resize(logo_gray, (new_width, new_height))
             
             # ページ画像よりロゴが大きくなってしまった場合はスキップ
             if page_gray.shape[0] < resized_logo.shape[0] or page_gray.shape[1] < resized_logo.shape[1]:
@@ -68,6 +75,10 @@ def extract_pages_with_logo(pdf_path, logo_path, output_path, match_threshold=0.
             # テンプレートマッチング
             result = cv2.matchTemplate(page_gray, resized_logo, cv2.TM_CCOEFF_NORMED)
             _, max_val, _, _ = cv2.minMaxLoc(result)
+            
+            if max_val > best_overall_score:
+                best_overall_score = max_val
+                best_overall_scale = scale
             
             # 類似度がしきい値を超えたら「ロゴあり」と判定
             if max_val >= match_threshold:
@@ -78,7 +89,7 @@ def extract_pages_with_logo(pdf_path, logo_path, output_path, match_threshold=0.
                 break
         
         if not found_in_page:
-            print(f"❌ ページ {page_num + 1} はスキップ")
+            print(f"❌ ページ {page_num + 1} はスキップ (最大スコア: {best_overall_score:.2f}, 縮尺: {best_overall_scale:.2f})")
 
     # 3. 抽出結果の保存
     if found_pages:
