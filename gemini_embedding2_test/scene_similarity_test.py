@@ -35,7 +35,7 @@ def get_embedding(content):
     return np.array(result['embedding'])
 
 def main():
-    image_path = "image_sample.png"
+    image_path = "image1.png"
     texts = [
         "晴れた日の公園で、林の中をとぼとぼと歩きながら、赤いフリスビーを踏んでいるゴールデンレトリバー",
         "曇りの日の公園で、赤い花畑の横の芝生を、緑のフリスビーを口にくわえて眠っているゴールデンレトリバー",
