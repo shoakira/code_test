@@ -1,52 +1,43 @@
-# 🚀 Project Overview
+# 🚀 Project Hub
 
-This project contains a directory structure with Python scripts and data related to various fields. Below is an overview of each directory.
+This repository is a collection of various experimental projects, ranging from physics simulations to game development and AI research. 
 
-## 📂 Directory Structure
+Detailed documentation for each sub-project can be found within its respective directory.
 
-### 🎮 make_game
-Contains scripts and resources related to game development. You can create various games using scripts such as `galaga.py`, `invader.py`, `othello.py`, and `quiz.py`.
+## 📂 Sub-Projects
 
-### 🤖 openai_test
-Contains scripts for testing OpenAI functionality. Includes demos for JSON formatting (`openai_json_format.py`), translation features (`openai_translator.py`), and paper review (`paper_review.py`).
+### [🎮 make_game](make_game/README.md)
+Python-based game development resources and classic game clones.
 
-### 🧠 RL_code
-Contains code related to reinforcement learning. You can implement reinforcement learning algorithms using `RLgym.py` and `RLPolicyGradient.py`. Includes saved policy network checkpoints and demo videos in the `video` directory.
+### [🤖 openai_test](openai_test/README.md)
+Demos and experiments using the OpenAI API, including JSON formatting and automated paper reviews.
 
-### 📊 robot_graph
-Contains scripts and data related to robot graphs. Includes scripts for graph visualization (`dependency_visualization.svg`), data transformation (`rdf2neo4j.py`), and cypher queries (`cypher_queries.txt`).
+### [🧠 RL_code](RL_code/README.md)
+Implementation of Reinforcement Learning algorithms and agent training environments.
 
-### 📄 pdf2text
-Contains scripts for extracting text from PDF files. Includes `extract_pdf_text.py` for converting PDFs to text.
+### [📊 robot_graph](robot_graph/README.md)
+Graph-based representations and dependencies for robotic behaviors.
 
-### 🔍 gemini_embedding2_test
-Contains scripts for exploring multimodal embeddings and comparing various image/PDF search techniques.
-- `embedding_test.py`: Script to test **Gemini Embedding 2**'s multimodal capabilities.
-- `extract_with_embedding.py`: Uses **Gemini Embedding 2** for abstract PDF page extraction.
-- `extract_pdf_pages.py`: Uses **OpenCV Template Matching** for pixel-perfect search.
-- `extract_pdf_pages_sift.py`: Uses **OpenCV SIFT Feature Matching** for robust geometric logo search.
-- `scene_similarity_test.py`: Compares an image with multiple detailed text queries (e.g., dog park scenes) to find the most accurate semantic description.
-- `image_matrix_similarity.py`: Calculates and visualizes a similarity matrix (heatmap) between multiple images.
-- `mixed_matrix_similarity.py`: Performs cross-modal comparison between images and texts, visualizing their relationships in a single heatmap matrix.
+### [🔍 gemini_embedding2_test](gemini_embedding2_test/README.md)
+Cutting-edge multimodal embedding tests using Gemini Embedding 2 for PDF and image retrieval.
 
-#### 💡 Key Insights from Experiments
-- **Semantic Nuance**: Gemini Embedding 2 can distinguish fine-grained differences in scenes (e.g., a dog "running" vs "resting", or "red" vs "green" frisbees) by mapping them to distinct vectors.
-- **Modality Agnostic**: Images and texts can be directly compared, allowing for precise cross-modal retrieval and similarity analysis.
-- **Tool Selection**: While embeddings are great for "vibe" and "meaning," traditional CV (SIFT) remains superior for exact, small geometric pattern matching (logos).
+### [🌡️ blackbody](blackbody/README.md)
+Physics simulations focusing on blackbody radiation and thermal properties.
 
+### [📄 pdf2text](pdf2text/README.md)
+Simple utilities for extracting text from PDF documents.
 
-## 📝 Root Scripts
+---
 
-- `ner_test.py`: Script for testing Named Entity Recognition (NER) functionality.
+## 🛠️ Getting Started
 
-## 🛠️ Usage
+Most projects require an environment with Python 3 and various dependencies. See [requirements.txt](requirements.txt) for a general list of needed packages.
 
-Each directory contains specific tools and scripts that can be used according to their respective documentation.
-
-## 📝 Contributing
-
-Feel free to submit issues or pull requests if you have suggestions or improvements.
+### API Keys
+For AI-related projects (`openai_test`, `gemini_embedding2_test`), ensure you have a `.env` file with the necessary keys:
+- `OPENAI_API_KEY`
+- `GOOGLE_API_KEY`
 
 ## 📜 License
 
-This project is available for internal use and testing purposes.
+This project is intended for internal research and testing.
